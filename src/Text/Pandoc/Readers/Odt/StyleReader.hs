@@ -1,8 +1,8 @@
 {-# LANGUAGE Arrows          #-}
 
+{-# LANGUAGE CPP             #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections   #-}
-
 {-
 Copyright (C) 2015 Martin Linnemann <theCodingMarlin@googlemail.com>
 
@@ -183,13 +183,23 @@ data Styles           = Styles
   deriving ( Show )
 
 -- Styles from a monoid under union
+appendStyles :: Styles -> Styles -> Styles
+appendStyles (Styles sBn1 dSm1 lsBn1)
+             (Styles sBn2 dSm2 lsBn2)
+           = Styles (M.union sBn1  sBn2)
+                    (M.union dSm1  dSm2)
+                    (M.union lsBn1 lsBn2)
+
+#if MIN_VERSION_base(4,11,0)
+instance Semigroup Styles where
+  (<>) = appendStyles
+#endif
+
 instance Monoid Styles where
   mempty  = Styles M.empty M.empty M.empty
-  mappend  (Styles sBn1 dSm1 lsBn1)
-           (Styles sBn2 dSm2 lsBn2)
-          = Styles (M.union sBn1  sBn2)
-                   (M.union dSm1  dSm2)
-                   (M.union lsBn1 lsBn2)
+#if !MIN_VERSION_base(4,11,0)
+  mappend = appendStyles
+#endif
 
 -- Not all families from the specifications are implemented, only those we need.
 -- But there are none that are not mentioned here.

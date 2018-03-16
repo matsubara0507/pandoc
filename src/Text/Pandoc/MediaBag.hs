@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP                        #-}
 {-# LANGUAGE DeriveDataTypeable         #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-
@@ -49,8 +50,13 @@ import Text.Pandoc.MIME (MimeType, getMimeTypeDef)
 -- mime types.  Note that a 'MediaBag' is a Monoid, so 'mempty'
 -- can be used for an empty 'MediaBag', and '<>' can be used to append
 -- two 'MediaBag's.
+#if MIN_VERSION_base(4,11,0)
+newtype MediaBag = MediaBag (M.Map [String] (MimeType, BL.ByteString))
+        deriving (Semigroup, Monoid, Data, Typeable)
+#else
 newtype MediaBag = MediaBag (M.Map [String] (MimeType, BL.ByteString))
         deriving (Monoid, Data, Typeable)
+#endif
 
 instance Show MediaBag where
   show bag = "MediaBag " ++ show (mediaDirectory bag)

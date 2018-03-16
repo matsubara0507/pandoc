@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP                        #-}
 {-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-
@@ -79,8 +80,13 @@ data Term =
   | Listing
   deriving (Show, Eq, Ord, Generic, Enum, Read)
 
+#if MIN_VERSION_base(4,11,0)
+newtype Translations = Translations (M.Map Term String)
+        deriving (Show, Generic, Semigroup, Monoid)
+#else
 newtype Translations = Translations (M.Map Term String)
         deriving (Show, Generic, Monoid)
+#endif
 
 instance FromJSON Term where
   parseJSON (String t) = case safeRead (T.unpack t) of

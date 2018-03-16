@@ -922,8 +922,13 @@ data FileInfo = FileInfo { infoFileMTime :: UTCTime
                          , infoFileContents :: B.ByteString
                          }
 
+#if MIN_VERSION_base(4,11,0)
+newtype FileTree = FileTree {unFileTree :: M.Map FilePath FileInfo}
+  deriving (Semigroup, Monoid)
+#else
 newtype FileTree = FileTree {unFileTree :: M.Map FilePath FileInfo}
   deriving (Monoid)
+#endif
 
 getFileInfo :: FilePath -> FileTree -> Maybe FileInfo
 getFileInfo fp tree =

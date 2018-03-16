@@ -111,8 +111,13 @@ data D = Text Int String
        | BlankLines Int  -- number of blank lines
        deriving (Show, Eq)
 
+#if MIN_VERSION_base(4,11,0)
+newtype Doc = Doc { unDoc :: Seq D }
+              deriving (Semigroup, Monoid, Show, Eq)
+#else
 newtype Doc = Doc { unDoc :: Seq D }
               deriving (Monoid, Show, Eq)
+#endif
 
 instance IsString Doc where
   fromString = text

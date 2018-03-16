@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 -}
+{-# LANGUAGE CPP                        #-}
 {-# LANGUAGE DeriveDataTypeable         #-}
 {-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -59,9 +60,19 @@ import Text.Parsec
 newtype Extensions = Extensions Integer
   deriving (Show, Read, Eq, Ord, Data, Typeable, Generic, ToJSON, FromJSON)
 
+appendExtensions :: Extensions -> Extensions -> Extensions
+appendExtensions (Extensions a) (Extensions b) = Extensions (a .|. b)
+
+#if MIN_VERSION_base(4,11,0)
+instance Semigroup Extensions where
+  (<>) = appendExtensions
+#endif
+
 instance Monoid Extensions where
   mempty = Extensions 0
-  mappend (Extensions a) (Extensions b) = Extensions (a .|. b)
+#if !MIN_VERSION_base(4,11,0)
+  mappend = appendExtensions
+#endif
 
 extensionsFromList :: [Extension] -> Extensions
 extensionsFromList = foldr enableExtension emptyExtensions
